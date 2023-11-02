@@ -24,7 +24,7 @@
 #
 ################################################################################
 
-[FD.sm7125_UEFI]
+[FD.sm6225_UEFI]
 BaseAddress   = $(FD_BASE)|gArmTokenSpaceGuid.PcdFdBaseAddress  # The base address of the Firmware
 Size          = $(FD_SIZE)|gArmTokenSpaceGuid.PcdFdSize
 ErasePolarity = 1
@@ -52,6 +52,7 @@ NumBlocks     = 0x700
 0x00000000|0x00700000
 gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
 FV = FVMAIN_COMPACT
+
 
 ################################################################################
 #
@@ -85,7 +86,7 @@ READ_LOCK_CAP      = TRUE
 READ_LOCK_STATUS   = TRUE
 
 # Apriori
-!include Platform/Qualcomm/sm7125/Apriori.fdf.inc
+!include Platform/Qualcomm/sm6225/Apriori.fog.fdf.inc
 
   INF MdeModulePkg/Core/Dxe/DxeMain.inf
 
@@ -128,22 +129,34 @@ READ_LOCK_STATUS   = TRUE
   INF MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
 
 # BSP drivers
-!include Platform/Qualcomm/sm7125/dxe.fdf.inc
+!include Platform/Qualcomm/sm6225/dxe.fog.fdf.inc
 
-  INF Silicon/Qualcomm/QcomPkg/Drivers/SimpleFbDxe/SimpleFbDxe.inf
+  #
+  # Helper drivers
+  #
+  INF Platform/RenegadePkg/Drivers/SetCPUFreqDxe/SetCPUFreqDxe.inf
 
   #
   # USB Host Support
   #
-  INF MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
+  # INF MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
   INF MdeModulePkg/Bus/Usb/UsbMouseDxe/UsbMouseDxe.inf
-  INF MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
+  # INF MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
 
   #
   # FAT filesystem + GPT/MBR partitioning
   #
-  INF MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
-  INF MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+  
+    FILE DRIVER = 6B38F7B4-AD98-40E9-9093-ACA2B5A253C4 {
+            SECTION PE32 =  Platform/EFI_Binaries/Drivers/Devices/fog/DiskIoDxe/DiskIoDxe.efi
+            SECTION UI = "DiskIoDxe"
+    }
+
+    FILE DRIVER = 1FA1F39E-FEFF-4AAE-BD7B-38A070A3B609 {
+            SECTION PE32 =  Platform/EFI_Binaries/Drivers/Devices/fog/PartitionDxe/PartitionDxe.efi
+            SECTION UI = "PartitionDxe"
+    }
+    
   INF FatPkg/EnhancedFatDxe/Fat.inf
   INF MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
   INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
@@ -215,8 +228,8 @@ READ_LOCK_STATUS   = TRUE
   }
 
   INF Platform/RenegadePkg/Application/Reboot2PayloadApp/Reboot2PayloadApp.inf
-!endif
 
+!endif
 # Device specific fdf
 !include $(DEVICE_DXE_FV_COMPONENTS)
 
@@ -244,6 +257,11 @@ READ_LOCK_STATUS   = TRUE
     SECTION GUIDED EE4E5898-3914-4259-9D6E-DC7BD79403CF PROCESSING_REQUIRED = TRUE {
       SECTION FV_IMAGE = FVMAIN
     }
+  }
+
+  FILE FREEFORM = DDE58710-41CD-4306-DBFB-3FA90BB1D2DD {
+    SECTION UI = "uefiplat.cfg"
+    SECTION RAW = Platform/Xiaomi/sm6225/RawFiles/fog/uefiplat.cfg
   }
 
 !include Silicon/Qualcomm/QcomPkg/QcomCommonFdf.inc
